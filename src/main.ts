@@ -1,8 +1,19 @@
-import { getCars } from './api/garage/get';
+import { router, navigateTo } from './router/router';
 
 async function main() {
-  const cars = await getCars();
-  console.log(cars);
+  window.addEventListener('popstate', router);
+
+  document.addEventListener('DOMContentLoaded', () => {
+    document.body.addEventListener('click', (e) => {
+      const target = e.target as HTMLAnchorElement;
+
+      if (target.matches('[data-link]')) {
+        e.preventDefault();
+        navigateTo(target.href);
+      }
+    });
+    router();
+  });
 }
 
 main();
