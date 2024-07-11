@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
-    "style": "sass src/style.scss src/style.css",
+    "style": "sass src/scss/_main.scss src/scss/main.css --watch",
     "lint": "eslint src/**/*.ts --fix"
   },
   "devDependencies": {

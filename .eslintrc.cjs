@@ -23,6 +23,9 @@ module.exports = {
   },
   ignorePatterns: ['.eslintrc.cjs'],
   rules: {
+    '@typescript-eslint/lines-between-class-members': 'off',
     'no-param-reassign': 'off',
+    'no-restricted-globals': 'off',
+    'class-methods-use-this': 'off',
   },
 };
