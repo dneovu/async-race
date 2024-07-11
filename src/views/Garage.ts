@@ -7,18 +7,19 @@ import deleteCar from '../api/garage/deleteCar';
 import createCar from '../api/garage/createCar';
 import updateCar from '../api/garage/updateCar';
 import isCar from '../utils/isCar';
+import { carNames } from '../utils/carNames';
 
 export default class extends AbstractView {
-  private updateView: () => void;
-
-  constructor(updateView: () => void) {
+  constructor() {
     super();
-    this.updateView = updateView;
     this.setTitle('Garage');
   }
 
   createHtmlTitle(totalCount: TotalCount): HTMLElement {
-    const title = createElement('h1', { class: 'page-title', text: `Garage (${totalCount})` });
+    const title = createElement('h1', {
+      class: 'page-title',
+      text: `Garage (${totalCount})`,
+    });
     return title;
   }
 
@@ -106,7 +107,7 @@ export default class extends AbstractView {
 
       if (name !== '') {
         await createCar({ name, color });
-        this.updateView();
+        this.updateGarage();
       }
     };
 
@@ -126,7 +127,7 @@ export default class extends AbstractView {
     carRemove.addEventListener('click', async (e) => {
       e.preventDefault();
       await deleteCar(id);
-      this.updateView();
+      this.updateGarage();
     });
 
     const carSelect = createElement('button', {
@@ -144,10 +145,38 @@ export default class extends AbstractView {
     return { remove: carRemove, select: carSelect };
   }
 
+  async generateNewCars() {
+    const newCars: Promise<Car>[] = [];
+    const randomCarProps = () => {
+      const randomColor = `#${Math.floor(Math.random() * 16777215).toString(16)}`;
+      const randomName = `${carNames.makes[Math.floor(Math.random() * carNames.makes.length)]} ${carNames.models[Math.floor(Math.random() * carNames.models.length)]}`;
+      return { name: randomName, color: randomColor };
+    };
+    for (let i = 0; i < 100; i++) {
+      const car = createCar(randomCarProps());
+      newCars.push(car);
+    }
+
+    const resolvedCars = await Promise.all(newCars);
+    return resolvedCars;
+  }
+
+  createGenerateCarsButton(): HTMLElement {
+    const button = createElement('button', { class: 'control-button', text: 'Generate cars' });
+
+    button.addEventListener('click', async (e) => {
+      e.preventDefault();
+      await this.generateNewCars();
+      this.updateGarage();
+    });
+
+    return button;
+  }
+
   async renderCars(): Promise<{ totalCount: TotalCount; carsHtml: HTMLElement }> {
     const garageContainer = createElement('div', { class: 'garage' });
 
-    const response = await getCars({ limit: 7 });
+    const response = await getCars({ limit: 1000 });
 
     if (!response) {
       garageContainer.innerHTML = `Failed to load cars`;
@@ -175,6 +204,15 @@ export default class extends AbstractView {
     return { totalCount, carsHtml: garageContainer };
   }
 
+  async updateGarage() {
+    const { totalCount, carsHtml } = await this.renderCars();
+    const pageTitle = document.querySelector('.page-title') as HTMLElement;
+    pageTitle.textContent = `Garage (${totalCount})`;
+
+    const garageWrapper = document.querySelector('.garage') as HTMLElement;
+    garageWrapper.innerHTML = '';
+    garageWrapper.appendChild(carsHtml);
+  }
   async render() {
     const { totalCount, carsHtml } = await this.renderCars();
     const garageWrapper = createElement('div', { class: 'garage-wrapper' });
@@ -185,6 +223,7 @@ export default class extends AbstractView {
     </nav>`;
     controlWrapper.appendChild(this.createHtmlCarCreation());
     controlWrapper.appendChild(this.createHtmlCarUpdate());
+    controlWrapper.appendChild(this.createGenerateCarsButton());
     garageWrapper.appendChild(controlWrapper);
     garageWrapper.appendChild(this.createHtmlTitle(totalCount));
     garageWrapper.appendChild(carsHtml);

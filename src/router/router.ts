@@ -13,12 +13,8 @@ type RouteMatch = {
 };
 
 export const router = async (): Promise<void> => {
-  const updateView = (): void => {
-    router();
-  };
-
   const routes: Route[] = [
-    { path: '/garage', view: new Garage(updateView) },
+    { path: '/garage', view: new Garage() },
     { path: '/winners', view: new Winners() },
   ];
 
