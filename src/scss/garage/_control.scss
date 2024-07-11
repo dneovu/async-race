@@ -1,0 +1,27 @@
+.control-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.car-creation, .car-update {
+  display: flex;
+  gap: 10px;
+  height: 20px;
+}
+
+.control-color {
+  height: 20px;
+  padding: 0;
+}
+
+.control-name {
+  outline: none;
+  &:focus {
+    box-shadow: 0 0 0 1px $color-sun;
+  }
+}
+
+.control-button {
+  width: 60px;
+}

@@ -1,8 +1,9 @@
-import { Car } from './shared';
 import carIcon from '../../public/icons/carIcon';
 
-export default function getCarSvg(car: Car) {
-  const { color } = car;
+export default function getCarSvg(color: string): string {
+  const params = carIcon.split(' ');
+  const fillIndex = params.findIndex((_, index) => params[index].includes('fill'));
 
-  return carIcon.replace(`fill="#000`, `fill="${color}`);
+  params[fillIndex] = `fill="${color}"`;
+  return params.join(' ');
 }

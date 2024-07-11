@@ -1,11 +1,8 @@
 import API_URL from './constants';
 import { Car } from '../../utils/shared';
 
-export default async function updateCar(
-  id: number,
-  car: { name: string; color: string },
-): Promise<Car | {}> {
-  const url = new URL(`${API_URL}/${id}`);
+export default async function updateCar(car: Car): Promise<Car | {}> {
+  const url = new URL(`${API_URL}/${car.id}`);
 
   return fetch(url, {
     method: 'PUT',

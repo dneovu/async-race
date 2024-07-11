@@ -43,4 +43,32 @@ nav {
   background-color: rgb(209, 209, 209);
 }
 
+.control-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.car-creation, .car-update {
+  display: flex;
+  gap: 10px;
+  height: 20px;
+}
+
+.control-color {
+  height: 20px;
+  padding: 0;
+}
+
+.control-name {
+  outline: none;
+}
+.control-name:focus {
+  box-shadow: 0 0 0 1px rgb(229, 196, 64);
+}
+
+.control-button {
+  width: 60px;
+}
+
 /*# sourceMappingURL=main.css.map */
