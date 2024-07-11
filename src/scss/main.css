@@ -1,0 +1,46 @@
+body {
+  background-color: rgba(0, 0, 0, 0.85);
+}
+
+.page-title {
+  color: white;
+}
+
+nav {
+  color: white;
+}
+
+.car {
+  color: rgb(229, 196, 64);
+  font-size: 20px;
+  border: 0;
+  border-bottom: 3px;
+  border-style: dotted;
+}
+
+.car-content {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.car-icon {
+  width: 60px;
+}
+
+.car-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: white;
+  color: rgba(0, 0, 0, 0.85);
+  border-radius: 4px;
+  border-color: rgb(229, 196, 64);
+  width: 60px;
+  height: 20px;
+}
+.car-button:hover {
+  background-color: rgb(209, 209, 209);
+}
+
+/*# sourceMappingURL=main.css.map */

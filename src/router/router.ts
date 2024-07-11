@@ -13,8 +13,12 @@ type RouteMatch = {
 };
 
 export const router = async (): Promise<void> => {
+  const updateView = (): void => {
+    router();
+  };
+
   const routes: Route[] = [
-    { path: '/garage', view: new Garage() },
+    { path: '/garage', view: new Garage(updateView) },
     { path: '/winners', view: new Winners() },
   ];
 
@@ -38,7 +42,8 @@ export const router = async (): Promise<void> => {
 
   const { view } = match.route;
 
-  document.body.innerHTML = await view.render();
+  document.body.innerHTML = '';
+  document.body.appendChild(await view.render());
 };
 
 export const navigateTo = (url: string): void => {

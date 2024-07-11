@@ -3,7 +3,7 @@ export default abstract class {
     document.title = title;
   }
 
-  async render(): Promise<string> {
-    return '';
+  async render(): Promise<HTMLElement> {
+    return document.createElement('div');
   }
 }

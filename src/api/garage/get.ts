@@ -1,9 +1,11 @@
 import API_URL from './constants';
 import { Car, GetCarsParams } from '../../utils/shared';
 
+export type TotalCount = number | null;
+
 type GetCarsResponse = {
   cars: Car[];
-  totalCount: number | null;
+  totalCount: TotalCount;
 };
 
 export async function getCar(id: number): Promise<Car | {}> {
@@ -25,8 +27,11 @@ export async function getCars(params?: GetCarsParams): Promise<GetCarsResponse |
   if (params?.limit) url.searchParams.append('_limit', String(params.limit));
 
   return fetch(url).then((response) =>
-    response.json().then((cars) => {
-      const totalCount = params?.limit ?? Number(response.headers.get('X-Total-Count'));
+    response.json().then((cars): GetCarsResponse => {
+      let totalCount = null;
+      if (params?.limit) {
+        totalCount = Number(response.headers.get('X-Total-Count'));
+      }
       return { cars, totalCount };
     }),
   );
