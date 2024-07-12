@@ -1,22 +1,4 @@
-.car {
-  color: $color-sun;
-  font-size: 20px;
-  border: 0;
-  border-bottom: 3px;
-  border-style: dotted;
-}
-
-.car-content {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.car-icon {
-  width: 60px;
-}
-
-.car-button {
+.button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -24,10 +6,16 @@
   color: $color-dark;
   border-radius: 4px;
   border-color: $color-sun;
-  width: 60px;
+  min-width: 60px;
+  max-width: 150px;
   height: 20px;
 
   &:hover {
     background-color: rgb(209, 209, 209);
+  }
+
+  &:disabled {
+    border: none;
+    background-color: rgb(125, 125, 125);
   }
 }

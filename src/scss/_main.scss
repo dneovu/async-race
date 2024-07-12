@@ -3,5 +3,7 @@
 @import "base";
 @import "nav";
 
-@import "garage/car";
-@import "garage/control"
+@import "components/garage/car";
+@import "components/garage/control";
+@import "components/button";
+@import "components/pagination";

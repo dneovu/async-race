@@ -1,7 +1,7 @@
 import AbstractView from './AbstractView';
 import { getCars, TotalCount, getCar } from '../api/garage/get';
 import getCarSvg from '../utils/getCarSvg';
-import { Car } from '../utils/shared';
+import { Car, GetCarsParams } from '../utils/shared';
 import createElement from '../utils/createElement';
 import deleteCar from '../api/garage/deleteCar';
 import createCar from '../api/garage/createCar';
@@ -10,17 +10,31 @@ import isCar from '../utils/isCar';
 import { carNames } from '../utils/carNames';
 
 export default class extends AbstractView {
+  currentPageNumber: number;
+  totalCount: TotalCount;
+  NumberOfCarsPerPage: number;
+
   constructor() {
     super();
-    this.setTitle('Garage');
+    this.title = 'Garage';
+    this.currentPageNumber = 1;
+    this.totalCount = 0;
+    this.NumberOfCarsPerPage = 0;
   }
-
   createHtmlTitle(totalCount: TotalCount): HTMLElement {
     const title = createElement('h1', {
       class: 'page-title',
       text: `Garage (${totalCount})`,
     });
     return title;
+  }
+
+  createHtmlPageNumber(): HTMLElement {
+    const currentPageNumber = createElement('h2', {
+      class: 'page-number',
+      text: `Page #${this.currentPageNumber}`,
+    });
+    return currentPageNumber;
   }
 
   createHtmlCarUpdate(): HTMLElement {
@@ -37,7 +51,7 @@ export default class extends AbstractView {
     }) as HTMLInputElement;
 
     const button = createElement('button', {
-      class: 'control-button',
+      class: 'button',
       text: 'Update',
       id: 'car-update-button',
     });
@@ -98,7 +112,7 @@ export default class extends AbstractView {
       class: 'control-color',
       type: 'color',
     }) as HTMLInputElement;
-    const button = createElement('button', { class: 'control-button', text: 'Create' });
+    const button = createElement('button', { class: 'button', text: 'Create' });
 
     const carCreationHandler = async (e: Event) => {
       e.preventDefault();
@@ -120,7 +134,7 @@ export default class extends AbstractView {
 
   createHtmlCarButtons(id: number): { remove: HTMLElement; select: HTMLElement } {
     const carRemove = createElement('button', {
-      class: 'car-button',
+      class: 'button',
       text: 'Remove',
     });
 
@@ -131,7 +145,7 @@ export default class extends AbstractView {
     });
 
     const carSelect = createElement('button', {
-      class: 'car-button',
+      class: 'button',
       text: 'Select',
     });
 
@@ -145,7 +159,7 @@ export default class extends AbstractView {
     return { remove: carRemove, select: carSelect };
   }
 
-  async generateNewCars() {
+  async generateNewCars(): Promise<Car[]> {
     const newCars: Promise<Car>[] = [];
     const randomCarProps = () => {
       const randomColor = `#${Math.floor(Math.random() * 16777215).toString(16)}`;
@@ -162,7 +176,7 @@ export default class extends AbstractView {
   }
 
   createGenerateCarsButton(): HTMLElement {
-    const button = createElement('button', { class: 'control-button', text: 'Generate cars' });
+    const button = createElement('button', { class: 'button', text: 'Generate cars' });
 
     button.addEventListener('click', async (e) => {
       e.preventDefault();
@@ -173,10 +187,64 @@ export default class extends AbstractView {
     return button;
   }
 
-  async renderCars(): Promise<{ totalCount: TotalCount; carsHtml: HTMLElement }> {
+  createPaginationButtons(): HTMLElement {
+    const paginationButtonHandler = (btnType: 'prev' | 'next') => {
+      // const shownCars = this.NumberOfCarsPerPage + (this.currentPageNumber - 1) * this.NumberOfCarsPerPage;
+      let numberOfPages = 1;
+      if (this.totalCount) numberOfPages = Math.ceil(this.totalCount / this.NumberOfCarsPerPage);
+
+      const prevBtn = document.getElementById('garage-prev-page');
+      const nextBtn = document.getElementById('garage-next-page');
+
+      if (btnType === 'next') {
+        this.currentPageNumber++;
+
+        prevBtn?.removeAttribute('disabled');
+
+        if (numberOfPages === this.currentPageNumber) {
+          nextBtn?.setAttribute('disabled', 'true');
+        }
+      } else {
+        this.currentPageNumber--;
+
+        nextBtn?.removeAttribute('disabled');
+
+        if (this.currentPageNumber === 1) {
+          prevBtn?.setAttribute('disabled', 'true');
+        }
+      }
+      this.updateGarage();
+    };
+
+    const buttonNext = createElement('button', {
+      class: 'button',
+      text: 'Next',
+      id: 'garage-next-page',
+    });
+    buttonNext.addEventListener('click', () => paginationButtonHandler('next'));
+
+    const buttonPrev = createElement('button', {
+      class: 'button',
+      text: 'Prev',
+      id: 'garage-prev-page',
+    });
+    buttonPrev.addEventListener('click', () => paginationButtonHandler('prev'));
+
+    const paginationContainer = createElement('div', { class: 'pagination' });
+    paginationContainer.append(buttonPrev, buttonNext);
+    return paginationContainer;
+  }
+
+  async renderCars(
+    params?: GetCarsParams,
+  ): Promise<{ totalCount: TotalCount; carsHtml: HTMLElement }> {
+    const setNumberOfCarsPerPage = (n: number) => {
+      this.NumberOfCarsPerPage = n;
+    };
+
     const garageContainer = createElement('div', { class: 'garage' });
 
-    const response = await getCars({ limit: 1000 });
+    const response = await getCars(params);
 
     if (!response) {
       garageContainer.innerHTML = `Failed to load cars`;
@@ -184,6 +252,7 @@ export default class extends AbstractView {
     }
 
     const { totalCount, cars } = response;
+    setNumberOfCarsPerPage(cars.length);
 
     cars?.forEach(async (car: Car) => {
       const divCar = createElement('div', { class: 'car', id: String(car.id) });
@@ -205,28 +274,49 @@ export default class extends AbstractView {
   }
 
   async updateGarage() {
-    const { totalCount, carsHtml } = await this.renderCars();
+    const { totalCount, carsHtml } = await this.renderCars({
+      page: this.currentPageNumber,
+      limit: 7,
+    });
+    this.totalCount = totalCount;
+
     const pageTitle = document.querySelector('.page-title') as HTMLElement;
     pageTitle.textContent = `Garage (${totalCount})`;
+
+    const pageNumber = document.querySelector('.page-number') as HTMLElement;
+    pageNumber.textContent = `Page #${this.currentPageNumber}`;
 
     const garageWrapper = document.querySelector('.garage') as HTMLElement;
     garageWrapper.innerHTML = '';
     garageWrapper.appendChild(carsHtml);
   }
+
   async render() {
-    const { totalCount, carsHtml } = await this.renderCars();
+    const { totalCount, carsHtml } = await this.renderCars({
+      page: this.currentPageNumber,
+      limit: 7,
+    });
+    this.totalCount = totalCount;
+
     const garageWrapper = createElement('div', { class: 'garage-wrapper' });
     const controlWrapper = createElement('div', { class: 'control-wrapper' });
     garageWrapper.innerHTML = `<nav>
       <a href="/garage" class="nav__link" data-link>Garage</a>
       <a href="/winners" class="nav__link" data-link>Winners</a>
     </nav>`;
-    controlWrapper.appendChild(this.createHtmlCarCreation());
-    controlWrapper.appendChild(this.createHtmlCarUpdate());
-    controlWrapper.appendChild(this.createGenerateCarsButton());
-    garageWrapper.appendChild(controlWrapper);
-    garageWrapper.appendChild(this.createHtmlTitle(totalCount));
-    garageWrapper.appendChild(carsHtml);
+
+    controlWrapper.append(
+      this.createHtmlCarCreation(),
+      this.createHtmlCarUpdate(),
+      this.createGenerateCarsButton(),
+    );
+    garageWrapper.append(
+      controlWrapper,
+      this.createHtmlTitle(totalCount),
+      this.createHtmlPageNumber(),
+      carsHtml,
+      this.createPaginationButtons(),
+    );
 
     return garageWrapper;
   }

@@ -2,7 +2,7 @@ body {
   background-color: rgba(0, 0, 0, 0.85);
 }
 
-.page-title {
+.page-title, .page-number {
   color: white;
 }
 
@@ -28,28 +28,14 @@ nav {
   width: 60px;
 }
 
-.car-button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  background-color: white;
-  color: rgba(0, 0, 0, 0.85);
-  border-radius: 4px;
-  border-color: rgb(229, 196, 64);
-  width: 60px;
-  height: 20px;
-}
-.car-button:hover {
-  background-color: rgb(209, 209, 209);
-}
-
 .control-wrapper {
   display: flex;
   flex-direction: column;
   gap: 10px;
 }
 
-.car-creation, .car-update {
+.car-creation,
+.car-update {
   display: flex;
   gap: 10px;
   height: 20px;
@@ -67,8 +53,31 @@ nav {
   box-shadow: 0 0 0 1px rgb(229, 196, 64);
 }
 
-.control-button {
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: white;
+  color: rgba(0, 0, 0, 0.85);
+  border-radius: 4px;
+  border-color: rgb(229, 196, 64);
+  min-width: 60px;
   max-width: 150px;
+  height: 20px;
+}
+.button:hover {
+  background-color: rgb(209, 209, 209);
+}
+.button:disabled {
+  border: none;
+  background-color: rgb(125, 125, 125);
+}
+
+.pagination {
+  padding-top: 30px;
+  padding-bottom: 20px;
+  display: flex;
+  gap: 10px;
 }
 
 /*# sourceMappingURL=main.css.map */

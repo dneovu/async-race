@@ -1,0 +1,17 @@
+.car {
+  color: $color-sun;
+  font-size: 20px;
+  border: 0;
+  border-bottom: 3px;
+  border-style: dotted;
+}
+
+.car-content {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.car-icon {
+  width: 60px;
+}

@@ -4,7 +4,8 @@
   gap: 10px;
 }
 
-.car-creation, .car-update {
+.car-creation,
+.car-update {
   display: flex;
   gap: 10px;
   height: 20px;
@@ -17,11 +18,9 @@
 
 .control-name {
   outline: none;
+
   &:focus {
     box-shadow: 0 0 0 1px $color-sun;
   }
 }
 
-.control-button {
-  max-width: 150px;
-}

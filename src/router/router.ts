@@ -40,6 +40,7 @@ export const router = async (): Promise<void> => {
 
   document.body.innerHTML = '';
   document.body.appendChild(await view.render());
+  view.setTitle(view.title);
 };
 
 export const navigateTo = (url: string): void => {
