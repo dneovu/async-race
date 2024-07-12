@@ -188,9 +188,10 @@ export default class extends AbstractView {
   }
 
   createPaginationButtons(): HTMLElement {
+    let numberOfPages = 1;
+    if (this.totalCount) numberOfPages = Math.ceil(this.totalCount / this.NumberOfCarsPerPage);
+
     const paginationButtonHandler = (btnType: 'prev' | 'next') => {
-      // const shownCars = this.NumberOfCarsPerPage + (this.currentPageNumber - 1) * this.NumberOfCarsPerPage;
-      let numberOfPages = 1;
       if (this.totalCount) numberOfPages = Math.ceil(this.totalCount / this.NumberOfCarsPerPage);
 
       const prevBtn = document.getElementById('garage-prev-page');
@@ -201,17 +202,13 @@ export default class extends AbstractView {
 
         prevBtn?.removeAttribute('disabled');
 
-        if (numberOfPages === this.currentPageNumber) {
-          nextBtn?.setAttribute('disabled', 'true');
-        }
+        if (numberOfPages === this.currentPageNumber) nextBtn?.setAttribute('disabled', 'true');
       } else {
         this.currentPageNumber--;
 
         nextBtn?.removeAttribute('disabled');
 
-        if (this.currentPageNumber === 1) {
-          prevBtn?.setAttribute('disabled', 'true');
-        }
+        if (this.currentPageNumber === 1) prevBtn?.setAttribute('disabled', 'true');
       }
       this.updateGarage();
     };
@@ -221,6 +218,8 @@ export default class extends AbstractView {
       text: 'Next',
       id: 'garage-next-page',
     });
+
+    if (numberOfPages === this.currentPageNumber) buttonNext?.setAttribute('disabled', 'true');
     buttonNext.addEventListener('click', () => paginationButtonHandler('next'));
 
     const buttonPrev = createElement('button', {
@@ -228,6 +227,8 @@ export default class extends AbstractView {
       text: 'Prev',
       id: 'garage-prev-page',
     });
+
+    if (this.currentPageNumber === 1) buttonPrev?.setAttribute('disabled', 'true');
     buttonPrev.addEventListener('click', () => paginationButtonHandler('prev'));
 
     const paginationContainer = createElement('div', { class: 'pagination' });
@@ -286,9 +287,11 @@ export default class extends AbstractView {
     const pageNumber = document.querySelector('.page-number') as HTMLElement;
     pageNumber.textContent = `Page #${this.currentPageNumber}`;
 
-    const garageWrapper = document.querySelector('.garage') as HTMLElement;
-    garageWrapper.innerHTML = '';
-    garageWrapper.appendChild(carsHtml);
+    const garage = document.querySelector('.garage') as HTMLElement;
+    garage.replaceWith(carsHtml);
+
+    const pagination = document.querySelector('.pagination') as HTMLElement;
+    pagination.replaceWith(this.createPaginationButtons());
   }
 
   async render() {
