@@ -1,11 +1,11 @@
 import API_URL from './constants';
 
-type RouteResponse = {
+export type RouteResponse = {
   velocity: number;
   distance: number;
 };
 
-export default async function startStopEngine(
+export async function startStopEngine(
   id: number,
   status: 'started' | 'stopped',
 ): Promise<RouteResponse | undefined> {

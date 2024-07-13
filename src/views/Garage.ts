@@ -1,6 +1,7 @@
 import AbstractView from './AbstractView';
 import { getCars, TotalCount, getCar } from '../api/garage/get';
 import getCarSvg from '../utils/getCarSvg';
+import flagIcon from '../../public/icons/flagIcon';
 import { Car, GetCarsParams } from '../utils/shared';
 import createElement from '../utils/createElement';
 import deleteCar from '../api/garage/deleteCar';
@@ -8,6 +9,8 @@ import createCar from '../api/garage/createCar';
 import updateCar from '../api/garage/updateCar';
 import isCar from '../utils/isCar';
 import { carNames } from '../utils/carNames';
+import driveCar from '../api/engine/driveCar';
+import { startStopEngine } from '../api/engine/startStopEngine';
 
 export default class extends AbstractView {
   currentPageNumber: number;
@@ -132,12 +135,27 @@ export default class extends AbstractView {
     return carCreationContainer;
   }
 
-  createHtmlCarButtons(id: number): { remove: HTMLElement; select: HTMLElement } {
+  createHtmlCarButtons(id: number): {
+    remove: HTMLElement;
+    select: HTMLElement;
+    start: HTMLElement;
+    stop: HTMLElement;
+  } {
+    const changeActiveEngineButtons = () => {
+      const start = document
+        .getElementById(String(id))
+        ?.querySelector('.car_start') as HTMLButtonElement;
+      start.disabled = !start.disabled;
+      const stop = document
+        .getElementById(String(id))
+        ?.querySelector('.car_stop') as HTMLButtonElement;
+      stop.disabled = !stop.disabled;
+    };
+
     const carRemove = createElement('button', {
       class: 'button',
       text: 'Remove',
     });
-
     carRemove.addEventListener('click', async (e) => {
       e.preventDefault();
       await deleteCar(id);
@@ -148,7 +166,6 @@ export default class extends AbstractView {
       class: 'button',
       text: 'Select',
     });
-
     carSelect.addEventListener('click', async (e) => {
       e.preventDefault();
       const selectedCar = await getCar(id);
@@ -156,7 +173,65 @@ export default class extends AbstractView {
         this.setCarUpdate(selectedCar);
       }
     });
-    return { remove: carRemove, select: carSelect };
+
+    const carStart = createElement('button', {
+      class: 'button car_start',
+      text: 'A',
+    });
+    carStart.addEventListener('click', async (e) => {
+      e.preventDefault();
+      changeActiveEngineButtons();
+
+      this.startCar(id);
+    });
+
+    const carStop = createElement('button', {
+      class: 'button car_stop',
+      text: 'B',
+    });
+    carStop.setAttribute('disabled', 'true');
+    carStop.addEventListener('click', async (e) => {
+      e.preventDefault();
+      changeActiveEngineButtons();
+      this.stopCar(id);
+    });
+
+    return { remove: carRemove, select: carSelect, start: carStart, stop: carStop };
+  }
+
+  async startCar(id: number) {
+    const response = await startStopEngine(id, 'started');
+
+    let predictableTime = 0;
+    if (response) predictableTime = response.distance / response.velocity / 1000;
+
+    if (predictableTime) {
+      const car = document.getElementById(String(id))?.querySelector('.car-icon') as HTMLElement;
+      if (car) {
+        car.style.animationDuration = `${predictableTime}s`;
+        car.classList.add('car_animation');
+      }
+
+      const statusRes = await driveCar(id);
+      if (statusRes === 'broken') {
+        const transformValue = getComputedStyle(car).transform;
+
+        car.style.animation = 'none';
+        car.style.transform = transformValue;
+      } else if (statusRes?.success) {
+        console.log(`car ${id} finished`);
+      }
+    }
+  }
+
+  async stopCar(id: number) {
+    await startStopEngine(id, 'stopped');
+
+    const car = document.getElementById(String(id));
+    if (car) {
+      car.classList.remove('car_animation');
+      car.style.transform = 'none';
+    }
   }
 
   async generateNewCars(): Promise<Car[]> {
@@ -185,6 +260,38 @@ export default class extends AbstractView {
     });
 
     return button;
+  }
+
+  createResetButton(): HTMLElement {
+    const button = createElement('button', { class: 'button', text: 'Reset' });
+    button.addEventListener('click', async (e) => {
+      e.preventDefault();
+      const pageCars = await getCars({
+        page: this.currentPageNumber,
+        limit: this.NumberOfCarsPerPage,
+      }).then((data) => data?.cars);
+
+      const promiseContainer = [];
+
+      if (pageCars)
+        for (let i = 0; i < pageCars.length; i++) {
+          const carToDelete = this.stopCar(pageCars[i].id);
+          promiseContainer.push(carToDelete);
+        }
+
+      await Promise.all(promiseContainer);
+      this.updateGarage();
+    });
+    return button;
+  }
+
+  createAuxiliaryButtonsWrapper(): HTMLElement {
+    const buttonsWrapper = createElement('div', { class: 'auxiliary-buttons' });
+    const generate = this.createGenerateCarsButton();
+    const reset = this.createResetButton();
+    // const race = this.createRaceButton();
+    buttonsWrapper.append(generate, reset);
+    return buttonsWrapper;
   }
 
   createPaginationButtons(): HTMLElement {
@@ -260,14 +367,22 @@ export default class extends AbstractView {
       const carContent = createElement('div', { class: 'car-content' });
       const carSelect = this.createHtmlCarButtons(car.id).select;
       const carRemove = this.createHtmlCarButtons(car.id).remove;
+      const carStart = this.createHtmlCarButtons(car.id).start;
+      const carStop = this.createHtmlCarButtons(car.id).stop;
       const carName = createElement('p', { text: car.name });
+      const carRoad = createElement('div', { class: 'car-road' });
       const carIconWrapper = createElement('div', { class: 'car-icon' });
       const carIcon = createElement('svg');
       carIcon.innerHTML = getCarSvg(car.color);
+      const flagIconWrapper = createElement('div', { class: 'flag-icon' });
+      const flag = createElement('svg');
+      flag.innerHTML = flagIcon;
 
       carIconWrapper.append(carIcon);
-      carContent.append(carSelect, carRemove, carName);
-      divCar.append(carContent, carIconWrapper);
+      flagIconWrapper.append(flag);
+      carRoad.append(carIconWrapper, flagIconWrapper);
+      carContent.append(carSelect, carRemove, carStart, carStop, carName);
+      divCar.append(carContent, carRoad);
       garageContainer.append(divCar);
     });
 
@@ -311,7 +426,7 @@ export default class extends AbstractView {
     controlWrapper.append(
       this.createHtmlCarCreation(),
       this.createHtmlCarUpdate(),
-      this.createGenerateCarsButton(),
+      this.createAuxiliaryButtonsWrapper(),
     );
     garageWrapper.append(
       controlWrapper,

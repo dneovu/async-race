@@ -11,6 +11,7 @@ nav {
 }
 
 .car {
+  position: relative;
   color: rgb(229, 196, 64);
   font-size: 20px;
   border: 0;
@@ -23,11 +24,41 @@ nav {
   align-items: center;
   gap: 10px;
 }
+.car-content p {
+  margin: 0;
+}
 
 .car-icon {
   width: 60px;
 }
 
+.flag-icon {
+  padding-right: 10vw;
+  width: 50px;
+  height: 50px;
+}
+
+.car-road {
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+}
+
+.car_animation {
+  animation-name: drive;
+  animation-timing-function: linear;
+  animation-iteration-count: 1;
+  animation-fill-mode: forwards;
+}
+
+@keyframes drive {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(90vw);
+  }
+}
 .control-wrapper {
   display: flex;
   flex-direction: column;
@@ -35,7 +66,8 @@ nav {
 }
 
 .car-creation,
-.car-update {
+.car-update,
+.auxiliary-buttons {
   display: flex;
   gap: 10px;
   height: 20px;
@@ -51,6 +83,13 @@ nav {
 }
 .control-name:focus {
   box-shadow: 0 0 0 1px rgb(229, 196, 64);
+}
+
+.garage {
+  padding-top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
 }
 
 .button {

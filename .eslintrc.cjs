@@ -27,5 +27,6 @@ module.exports = {
     'no-param-reassign': 'off',
     'no-restricted-globals': 'off',
     'class-methods-use-this': 'off',
+    'no-plusplus': 'off',
   },
 };

@@ -5,7 +5,8 @@
 }
 
 .car-creation,
-.car-update {
+.car-update,
+.auxiliary-buttons {
   display: flex;
   gap: 10px;
   height: 20px;
@@ -23,4 +24,3 @@
     box-shadow: 0 0 0 1px $color-sun;
   }
 }
-
